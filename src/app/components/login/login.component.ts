@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../../services/authentication.service';
 
@@ -36,5 +36,10 @@ export class LoginComponent implements OnInit {
         console.error(error);
       }
     });
+  }
+
+  @HostListener('window:keydown.enter')
+  onEnter(): void {
+    this.onSignIn();
   }
 }

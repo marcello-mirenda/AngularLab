@@ -23,7 +23,7 @@
               </div>
             </div>
             <div class="alert alert-danger" role="alert" *ngIf="accessDenied">Access denied</div>
-            <button type="button" class="btn btn-default" [disabled]="credentialsForm.invalid || loading" (click)="onSignIn()">Sign-in</button>
+            <button type="button" class="btn btn-primary" [disabled]="credentialsForm.invalid || loading" (click)="onSignIn()">Sign-in</button>
           </form>
         </div>
       </div>

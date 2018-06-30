@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 @Injectable({
@@ -9,6 +9,10 @@ import { tap } from 'rxjs/operators';
 export class AuthenticationService {
 
   private _currentToken: string;
+  private userAuthenticatedSource = new Subject<string>();
+  userAuthenticated$ = this.userAuthenticatedSource.asObservable();
+  private userUnauthenticatedSource = new Subject<string>();
+  userUnauthenticated$ = this.userUnauthenticatedSource.asObservable();
 
   constructor(
     private _http: HttpClient
@@ -18,6 +22,14 @@ export class AuthenticationService {
     return this._currentToken;
   }
 
+  userAutheticated(token: string) {
+    this.userAuthenticatedSource.next(token);
+  }
+
+  userUnauthenticated() {
+    this.userUnauthenticatedSource.next();
+  }
+
   login(userName: string, password: string): Observable<string> {
     return this._http.post<string>('/api/login', {
       'userName': userName,
@@ -25,7 +37,13 @@ export class AuthenticationService {
     }).pipe(
       tap(x => {
         this._currentToken = x;
+        this.userAutheticated(x);
       })
     );
+  }
+
+  signOut(): void {
+    this._currentToken = null;
+    this.userUnauthenticated();
   }
 }
