@@ -1,1 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
+.overlay {
+    align-items: center;
+    background: rgba(39, 42, 43, 0.2);
+    display: flex;
+    height: 10rem;
+    justify-content: center;
+    opacity: 1;
+    position: absolute;
+    transition: opacity 200ms ease-in-out;
+    width: 10rem;
+    z-index: 2;
+    border-radius: 4px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+}
+

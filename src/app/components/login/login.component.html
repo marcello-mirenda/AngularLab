@@ -1,23 +1,33 @@
 <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-4"></div>
-      <div class="col-md-4">
-        <div class="panel panel-default">
-          <div class="panel-body">
-            <form>
-              <div class="form-group">
+  <div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+      <div class="overlay" *ngIf="loading">
+        <app-load-animation></app-load-animation>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <form #credentialsForm="ngForm" novalidate>
+            <div class="form-group">
+              <div [ngClass]="{'has-error': accessDenied || (userNameInput.invalid && (userNameInput.dirty || userNameInput.touched))}">
                 <label for="userName">User</label>
-                <input type="text" class="form-control" id="userName" placeholder="User">
+                <input type="text" class="form-control" id="userName" name="userName" #userNameInput="ngModel" [disabled]="loading" placeholder="User" required
+                  [(ngModel)]="userName">
               </div>
-              <div class="form-group">
+            </div>
+            <div class="form-group">
+              <div [ngClass]="{'has-error': accessDenied || (passwordInput.invalid && (passwordInput.dirty || passwordInput.touched))}">
                 <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" placeholder="Password">
+                <input type="password" class="form-control" id="password" name="password" #passwordInput="ngModel" [disabled]="loading" [(ngModel)]="password"
+                  required placeholder="Password">
               </div>
-              <button type="button" class="btn btn-default" (click)="onSignIn()">Sign-in</button>
-            </form>
-          </div>
+            </div>
+            <div class="alert alert-danger" role="alert" *ngIf="accessDenied">Access denied</div>
+            <button type="button" class="btn btn-default" [disabled]="credentialsForm.invalid || loading" (click)="onSignIn()">Sign-in</button>
+          </form>
         </div>
       </div>
-      <div class="col-md-4"></div>
     </div>
+    <div class="col-md-4"></div>
   </div>
+</div>
