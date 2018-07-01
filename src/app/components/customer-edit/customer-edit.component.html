@@ -1,0 +1,40 @@
+<div class="row">
+  <div class="col-md-2"></div>
+  <div class="col-md-8">
+    <div class="overlay" *ngIf="loading">
+      <app-load-animation></app-load-animation>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          <h4>Customer</h4>
+        </h3>
+      </div>
+      <div class="panel-body">
+        <form novalidate>
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name" [(ngModel)]="customer.firstName"
+              [disabled]="loading">
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name" [(ngModel)]="customer.lastName"
+              [disabled]="loading">
+          </div>
+          <div class="form-group">
+            <label>Delivery Locations</label>
+            <div class="list-group">
+              <button type="button" class="list-group-item" *ngFor="let item of customer.deliveryLocations">{{item.address}}</button>
+            </div>
+          </div>
+          <div class="btn-toolbar" role="toolbar">
+            <button type="button" class="btn btn-default" (click)="onGoBack()" [disabled]="loading">Go Back</button>
+            <button type="button" class="btn btn-default" [disabled]="loading">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2"></div>
+</div>

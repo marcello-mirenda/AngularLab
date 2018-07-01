@@ -1,24 +1,22 @@
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-11">
       <div class="page-header">
         <h1>Angular Lab
           <small>An experimental application</small>
         </h1>
       </div>
-      <div class="row">
-        <div class="col-md-11">
-        </div>
-        <div class="col-md-1">
-          <button type="button" class="btn btn-default" *ngIf="loggedin" (click)="onSignout()">Sign Out</button>
-        </div>
+    </div>
+    <div class="col-md-1">
+      <div class="btn-toolbar" role="toolbar">
+        <button type="button" class="btn btn-default" *ngIf="loggedin" (click)="onSignout()">Sign-Out</button>
       </div>
     </div>
   </div>
-</div>
-<div class="row">
-  <div class="col-md-12">
-    <router-outlet>
-    </router-outlet>
+  <div class="row">
+    <div class="col-md-12">
+      <router-outlet>
+      </router-outlet>
+    </div>
   </div>
 </div>

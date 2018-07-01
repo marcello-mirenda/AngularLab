@@ -10,6 +10,7 @@ import { CustomersComponent } from './components/customers/customers.component';
 import { AppRoutingModule } from './app-routing/app-routing.module';
 import { LoginComponent } from './components/login/login.component';
 import { LoadAnimationComponent } from './components/load-animation/load-animation.component';
+import { CustomerEditComponent } from './components/customer-edit/customer-edit.component';
 
 
 @NgModule({
@@ -17,7 +18,8 @@ import { LoadAnimationComponent } from './components/load-animation/load-animati
     AppComponent,
     CustomersComponent,
     LoginComponent,
-    LoadAnimationComponent
+    LoadAnimationComponent,
+    CustomerEditComponent
   ],
   imports: [
     BrowserModule,
