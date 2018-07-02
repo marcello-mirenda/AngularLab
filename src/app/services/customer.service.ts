@@ -27,4 +27,28 @@ export class CustomerService {
       }
     });
   }
+
+  updateCustomer(token: string, customer: Customer): Observable<Customer> {
+    return this._http.put<Customer>('/api/customer', customer, {
+      params: {
+        'token': token
+      }
+    });
+  }
+
+  createCustomer(token: string, customer: Customer): Observable<Customer> {
+    return this._http.post<Customer>('/api/customer', customer, {
+      params: {
+        'token': token
+      }
+    });
+  }
+
+  deleteCustomer(token: string, id: string): Observable<Object> {
+    return this._http.delete(`/api/customer/${id}`, {
+      params: {
+        'token': token
+      }
+    });
+  }
 }

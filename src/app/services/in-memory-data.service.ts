@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { InMemoryDbService, RequestInfo, getStatusText, ResponseOptions, STATUS } from 'angular-in-memory-web-api';
 import { Observable } from 'rxjs';
+import { Customer } from '../models/customer';
+
+interface Service {
+  search: string;
+  func: (info: RequestInfo, me: InMemoryDataService) => Observable<any>;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -91,10 +97,22 @@ export class InMemoryDataService extends InMemoryDbService {
     ]
   };
 
-  private _services = [
-    {search: '^/api/login$', func: this.apiPostLogin},
+  private _servicesGet: Service[] = [
     {search: '^/api/customer$', func: this.apiGetCustomers},
     {search: '^/api/customer/\\w+$', func: this.apiGetCustomer}
+  ];
+
+  private _servicesPost: Service[] = [
+    {search: '^/api/login$', func: this.apiPostLogin},
+    {search: '^/api/customer$', func: this.apiPostCustomer},
+  ];
+
+  private _servicesPut: Service[] = [
+    {search: '^/api/customer$', func: this.apiPutCustomer},
+  ];
+
+  private _servicesDelete: Service[] = [
+    {search: '^/api/customer/\\w+$', func: this.apiDeleteCustomer}
   ];
 
   createDb(info?: RequestInfo) {
@@ -102,15 +120,23 @@ export class InMemoryDataService extends InMemoryDbService {
   }
 
   get(info: RequestInfo): Observable<any> {
-    return this.CallService(info);
+    return this.CallService(info, this._servicesGet);
   }
 
   post(info: RequestInfo): Observable<any> {
-    return this.CallService(info);
+    return this.CallService(info, this._servicesPost);
   }
 
-  private CallService(info: RequestInfo): Observable<any> {
-    for (const service of this._services) {
+  put(info: RequestInfo): Observable<any> {
+    return this.CallService(info, this._servicesPut);
+  }
+
+  delete(info: RequestInfo): Observable<any> {
+    return this.CallService(info, this._servicesDelete);
+  }
+
+  private CallService(info: RequestInfo, services: Service[]): Observable<any> {
+    for (const service of services) {
       if (info.req.url.match(service.search)) {
         return service.func(info, this);
       }
@@ -149,11 +175,83 @@ export class InMemoryDataService extends InMemoryDbService {
       return me.createNotFoundResponse(info);
     }
   }
+
   private apiPostLogin(info: RequestInfo, me: InMemoryDataService): Observable<any> {
     const credentials = info.utils.getJsonBody(info.req);
     const user = info.utils.findById(me._database.users, credentials.userName);
     if (user && (user.password === credentials.password)) {
       return me.createUserResponse(info, user);
+    } else {
+      return me.createUnauthorizedResponse(info);
+    }
+  }
+
+  private apiPutCustomer(info: RequestInfo, me: InMemoryDataService): Observable<any> {
+    const tokenId = info.query.get('token').reduce(x => x);
+    const token = info.utils.findById(me._database.tokens, tokenId);
+    if (token) {
+      const user = info.utils.findById(me._database.users, token.user);
+      if (user) {
+        const customer = info.utils.getJsonBody(info.req) as Customer;
+        const customerFound = info.utils.findById(user.customers, customer.id);
+        if (customerFound) {
+          customerFound.firstName = customer.firstName;
+          customerFound.lastName = customer.lastName;
+          return me.createOkResponse(info, customerFound);
+        } else {
+          return me.createNotFoundResponse(info);
+        }
+      } else {
+        me.createUnauthorizedResponse(info);
+      }
+    } else {
+      return me.createUnauthorizedResponse(info);
+    }
+  }
+
+  private apiDeleteCustomer(info: RequestInfo, me: InMemoryDataService): Observable<any> {
+    const tokenId = info.query.get('token').reduce(x => x);
+    const token = info.utils.findById(me._database.tokens, tokenId);
+    if (token) {
+      const user = info.utils.findById(me._database.users, token.user);
+      if (user) {
+        const parsedUrl = info.utils.parseRequestUrl(info.url);
+        const customerFound = info.utils.findById(user.customers, parsedUrl.id);
+        if (customerFound) {
+          const index = user.customers.indexOf(customerFound);
+          if (index > -1) {
+            user.customers.splice(index, 1);
+          }
+          return me.createOkResponse(info, customerFound);
+        } else {
+          return me.createNotFoundResponse(info);
+        }
+      } else {
+        me.createUnauthorizedResponse(info);
+      }
+    } else {
+      return me.createUnauthorizedResponse(info);
+    }
+  }
+
+  private apiPostCustomer(info: RequestInfo, me: InMemoryDataService): Observable<any> {
+    const tokenId = info.query.get('token').reduce(x => x);
+    const token = info.utils.findById(me._database.tokens, tokenId);
+    if (token) {
+      const user = info.utils.findById(me._database.users, token.user);
+      if (user) {
+        const customer = info.utils.getJsonBody(info.req) as Customer;
+        const customerFound = info.utils.findById(user.customers, customer.id);
+        if (!customerFound) {
+          customer.id = me.makeId();
+          user.customers.push(customer);
+          return me.createOkResponse(info, customer);
+        } else {
+          return me.createBadRequestResponse(info, undefined);
+        }
+      } else {
+        me.createUnauthorizedResponse(info);
+      }
     } else {
       return me.createUnauthorizedResponse(info);
     }
@@ -208,5 +306,28 @@ export class InMemoryDataService extends InMemoryDbService {
       };
       return options;
     });
+  }
+
+  private createBadRequestResponse(info: RequestInfo, body: any): Observable<any> {
+    return info.utils.createResponse$(() => {
+      const options: ResponseOptions = {
+        status: STATUS.BAD_REQUEST,
+        statusText: getStatusText(STATUS.BAD_REQUEST),
+        headers: info.headers,
+        url: info.url
+      };
+      return options;
+    });
+  }
+
+  private makeId(): string {
+    let text = '';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+    for (let i = 0; i < 5; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
+    return text;
   }
 }

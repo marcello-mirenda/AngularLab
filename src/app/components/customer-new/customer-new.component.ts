@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Location } from '@angular/common';
 import { Customer } from '../../models/customer';
+import { ActivatedRoute } from '@angular/router';
 import { CustomerService } from '../../services/customer.service';
 import { AuthenticationService } from '../../services/authentication.service';
+import { Location } from '@angular/common';
 
 @Component({
-  selector: 'app-customer-edit',
-  templateUrl: './customer-edit.component.html',
-  styleUrls: ['./customer-edit.component.css']
+  selector: 'app-customer-new',
+  templateUrl: './customer-new.component.html',
+  styleUrls: ['./customer-new.component.css']
 })
-export class CustomerEditComponent implements OnInit {
+export class CustomerNewComponent implements OnInit {
 
   customer: Customer = {
     deliveryLocations: [],
@@ -28,19 +28,6 @@ export class CustomerEditComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.loading = true;
-    const id = this._route.snapshot.paramMap.get('id');
-    this._customerService.getCustomer(this._autheticationService.getToken(), id)
-      .subscribe({
-        next: customer => this.customer = customer,
-        complete: () => {
-          this.loading = false;
-        },
-        error: error => {
-          this.loading = false;
-          console.error(error);
-        }
-      });
   }
 
   onGoBack(): void {
@@ -49,7 +36,7 @@ export class CustomerEditComponent implements OnInit {
 
   onSave(): void {
     this.loading = true;
-    this._customerService.updateCustomer(this._autheticationService.getToken(), this.customer)
+    this._customerService.createCustomer(this._autheticationService.getToken(), this.customer)
       .subscribe({
         next: customer => {},
         complete: () => {
