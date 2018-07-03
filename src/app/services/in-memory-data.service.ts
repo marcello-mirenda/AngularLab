@@ -98,22 +98,33 @@ export class InMemoryDataService extends InMemoryDbService {
   };
 
   private _servicesGet: Service[] = [
-    {search: '^/api/customer$', func: this.apiGetCustomers},
-    {search: '^/api/customer/\\w+$', func: this.apiGetCustomer}
+    { search: '^/api/customer$', func: this.apiGetCustomers },
+    { search: '^/api/customer/\\w+$', func: this.apiGetCustomer }
   ];
 
   private _servicesPost: Service[] = [
-    {search: '^/api/login$', func: this.apiPostLogin},
-    {search: '^/api/customer$', func: this.apiPostCustomer},
+    { search: '^/api/login$', func: this.apiPostLogin },
+    { search: '^/api/customer$', func: this.apiPostCustomer },
   ];
 
   private _servicesPut: Service[] = [
-    {search: '^/api/customer$', func: this.apiPutCustomer},
+    { search: '^/api/customer$', func: this.apiPutCustomer },
   ];
 
   private _servicesDelete: Service[] = [
-    {search: '^/api/customer/\\w+$', func: this.apiDeleteCustomer}
+    { search: '^/api/customer/\\w+$', func: this.apiDeleteCustomer }
   ];
+
+  public makeId(): string {
+    let text = '';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+    for (let i = 0; i < 5; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
+    return text;
+  }
 
   createDb(info?: RequestInfo) {
     return this._database;
@@ -150,7 +161,11 @@ export class InMemoryDataService extends InMemoryDbService {
     if (token) {
       const user = info.utils.findById(me._database.users, token.user);
       if (user) {
-        return me.createOkResponse(info, user.customers);
+        const customers: Customer[] = [];
+        for (const item of user.customers) {
+          customers.push(me.createDeepCopy(item));
+        }
+        return me.createOkResponse(info, customers);
       } else {
         return me.createNotFoundResponse(info);
       }
@@ -167,7 +182,7 @@ export class InMemoryDataService extends InMemoryDbService {
       if (user) {
         const parsedUrl = info.utils.parseRequestUrl(info.url);
         const customer = info.utils.findById(user.customers, parsedUrl.id);
-        return me.createOkResponse(info, customer);
+        return me.createOkResponse(info, me.createDeepCopy(customer));
       } else {
         return me.createNotFoundResponse(info);
       }
@@ -197,7 +212,8 @@ export class InMemoryDataService extends InMemoryDbService {
         if (customerFound) {
           customerFound.firstName = customer.firstName;
           customerFound.lastName = customer.lastName;
-          return me.createOkResponse(info, customerFound);
+          customerFound.deliveryLocations = customer.deliveryLocations;
+          return me.createOkResponse(info, me.createDeepCopy(customerFound));
         } else {
           return me.createNotFoundResponse(info);
         }
@@ -244,7 +260,7 @@ export class InMemoryDataService extends InMemoryDbService {
         const customerFound = info.utils.findById(user.customers, customer.id);
         if (!customerFound) {
           customer.id = me.makeId();
-          user.customers.push(customer);
+          user.customers.push(me.createDeepCopy(customer));
           return me.createOkResponse(info, customer);
         } else {
           return me.createBadRequestResponse(info, undefined);
@@ -320,14 +336,13 @@ export class InMemoryDataService extends InMemoryDbService {
     });
   }
 
-  private makeId(): string {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-    for (let i = 0; i < 5; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
+  private createDeepCopy(customer: Customer): Customer {
+    const customerCopy = Object.assign({}, customer);
+    customerCopy.deliveryLocations = [];
+    for (const item of customer.deliveryLocations) {
+      customerCopy.deliveryLocations.push(Object.assign({}, item));
     }
-
-    return text;
+    return customerCopy;
   }
+
 }

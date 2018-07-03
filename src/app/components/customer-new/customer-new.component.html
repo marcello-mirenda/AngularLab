@@ -28,6 +28,22 @@
               <button type="button" class="list-group-item" *ngFor="let item of customer.deliveryLocations">{{item.address}}</button>
             </div>
           </div>
+          <div class="form-group">
+            <label for="lastName">Delivery Locations</label>
+            <div class="form-group">
+              <div class="btn-toolbar" role="toolbar">
+                <button type="button" class="btn btn-default btn-sm" (click)="onNewDeliveryLocation()">New</button>
+              </div>
+            </div>
+            <div class="list-group">
+              <div class="list-group-item" *ngFor="let item of customer.deliveryLocations">
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-default btn-sm" (click)="onEditDeliveryLocation(item)">{{item.address}}</button>
+                  <button type="button" class="btn btn-primary btn-sm" (click)="onDeleteDeliveryLocation(item)">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="btn-toolbar" role="toolbar">
             <button type="button" class="btn btn-default" (click)="onGoBack()" [disabled]="loading">Go Back</button>
             <button type="button" class="btn btn-default" (click)="onSave()" [disabled]="loading">Save</button>

@@ -1,0 +1,36 @@
+<div class="modal-header">
+  <h4 class="modal-title pull-left">Delete Customer</h4>
+  <button type="button" class="close pull-right" aria-label="Close" [disabled]="loading" (click)="closeDialog()">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="overlay" *ngIf="loading">
+    <app-load-animation></app-load-animation>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <form novalidate class="form-horizontal">
+        <div class="form-group">
+          <label class="col-md-2 control-label">Address</label>
+          <div class="col-md-10">
+            <input type="text" class="form-control" id="deliveryLocation" name="deliveryLocation" placeholder="Last Name" [(ngModel)]="deliveryLocation.address"
+              [disabled]="loading">
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" data-dismiss="modal" [disabled]="loading" (click)="confirm()">
+    Ok
+  </button>
+  <button type="button" class="btn btn-default" data-dismiss="modal" [disabled]="loading" (click)="closeDialog()">
+    Cancel
+  </button>
+</div>

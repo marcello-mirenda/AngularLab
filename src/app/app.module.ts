@@ -14,6 +14,7 @@ import { LoadAnimationComponent } from './components/load-animation/load-animati
 import { CustomerEditComponent } from './components/customer-edit/customer-edit.component';
 import { CustomerNewComponent } from './components/customer-new/customer-new.component';
 import { DialogConfirmDeleteCustomerComponent } from './components/dialog-confirm-delete-customer/dialog-confirm-delete-customer.component';
+import { DialogEditDeliveryLocationComponent } from './components/dialog-edit-delivery-location/dialog-edit-delivery-location.component';
 
 
 @NgModule({
@@ -24,7 +25,8 @@ import { DialogConfirmDeleteCustomerComponent } from './components/dialog-confir
     LoadAnimationComponent,
     CustomerEditComponent,
     CustomerNewComponent,
-    DialogConfirmDeleteCustomerComponent
+    DialogConfirmDeleteCustomerComponent,
+    DialogEditDeliveryLocationComponent
   ],
   imports: [
     BrowserModule,
@@ -41,7 +43,8 @@ import { DialogConfirmDeleteCustomerComponent } from './components/dialog-confir
     BsModalService,
   ],
   entryComponents: [
-    DialogConfirmDeleteCustomerComponent
+    DialogConfirmDeleteCustomerComponent,
+    DialogEditDeliveryLocationComponent
   ],
   bootstrap: [AppComponent]
 })
