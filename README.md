@@ -12,8 +12,8 @@ An experimental project to try out Angular features.
 
 ### Roadmap Status
     1. Done
-    2. In Progress
-    3. Waiting
+    2. Done (More optimizations might be possible)
+    3. In Pprogress
     4. Waiting
     5. Waiting
 
