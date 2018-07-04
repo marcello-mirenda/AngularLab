@@ -1,33 +1,32 @@
-import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Location } from '@angular/common';
+import { Store } from '@ngrx/store';
+
+import { AuthenticationService } from '../../services/authentication.service';
 import { Customer } from '../../models/customer';
 import { CustomerService } from '../../services/customer.service';
-import { AuthenticationService } from '../../services/authentication.service';
 import { DeliveryLocation } from '../../models/delivery-location';
-import { DialogOkCancelService } from '../../services/dialog-ok-cancel.service';
-import { DialogEditDeliveryLocationService, DeliveryLocationResult } from '../../services/dialog-edit-delivery-location.service';
-import { Subscription } from 'rxjs/internal/Subscription';
 // tslint:disable-next-line:max-line-length
 import { DIALOG_NAME as DIALOG_NAME_EDIT_DELIVERY_LOCATION } from '../dialog-edit-delivery-location/dialog-edit-delivery-location.component';
+import { DialogEditDeliveryLocationService, DeliveryLocationResult } from '../../services/dialog-edit-delivery-location.service';
+import { DialogOkCancelService } from '../../services/dialog-ok-cancel.service';
 import { DialogResultValue } from '../../models/dialog-result-value.enum';
 import { InMemoryDataService } from '../../services/in-memory-data.service';
+import { Subscription } from 'rxjs/internal/Subscription';
+import * as CustomerActions from '../../store/customer-actions';
+import * as fromRoot from '../../store/reducers';
 
 @Component({
   selector: 'app-customer-edit',
   templateUrl: './customer-edit.component.html',
   styleUrls: ['./customer-edit.component.css']
 })
-export class CustomerEditComponent implements OnInit {
+export class CustomerEditComponent implements OnInit, OnDestroy {
 
   private readonly _dialogOkCancelDeliveryLocationSubscription: Subscription;
 
-  customer: Customer = {
-    deliveryLocations: [],
-    firstName: null,
-    id: null,
-    lastName: null
-  };
+  customer: Customer;
   loading = false;
 
   constructor(
@@ -37,8 +36,12 @@ export class CustomerEditComponent implements OnInit {
     private _autheticationService: AuthenticationService,
     private _dialogOkCancelDeliveryLocationService: DialogOkCancelService<DeliveryLocationResult>,
     private _dialogConfirmDeleteCustomerService: DialogEditDeliveryLocationService,
-    private _InMemoryDataService: InMemoryDataService
+    private _InMemoryDataService: InMemoryDataService,
+    private _store: Store<fromRoot.State>
   ) {
+    _store.dispatch(new CustomerActions.CustomerNew());
+    _store.select(state => state.customers.currentCustomer).subscribe(x => this.customer = x);
+
     this._dialogOkCancelDeliveryLocationSubscription = this._dialogOkCancelDeliveryLocationService.dialogResult$.subscribe(msg => {
       if (msg.name === DIALOG_NAME_EDIT_DELIVERY_LOCATION && msg.result === DialogResultValue.Ok) {
         if (msg.data.operation === 'new') {
@@ -57,7 +60,7 @@ export class CustomerEditComponent implements OnInit {
     const id = this._route.snapshot.paramMap.get('id');
     this._customerService.getCustomer(this._autheticationService.getToken(), id)
       .subscribe({
-        next: customer => this.customer = customer,
+        next: customer => this._store.dispatch(new CustomerActions.CustomerGet(customer)),
         complete: () => {
           this.loading = false;
         },
@@ -66,6 +69,10 @@ export class CustomerEditComponent implements OnInit {
           console.error(error);
         }
       });
+  }
+
+  ngOnDestroy() {
+    this._dialogOkCancelDeliveryLocationSubscription.unsubscribe();
   }
 
   onNewDeliveryLocation(): void {
@@ -95,7 +102,7 @@ export class CustomerEditComponent implements OnInit {
     this.loading = true;
     this._customerService.updateCustomer(this._autheticationService.getToken(), this.customer)
       .subscribe({
-        next: customer => { },
+        next: customer => this._store.dispatch(new CustomerActions.CustomerUpdate(customer)),
         complete: () => {
           this.loading = false;
         },

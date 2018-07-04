@@ -44,8 +44,8 @@ export class CustomerService {
     });
   }
 
-  deleteCustomer(token: string, id: string): Observable<Object> {
-    return this._http.delete(`/api/customer/${id}`, {
+  deleteCustomer(token: string, id: string): Observable<Customer> {
+    return this._http.delete<Customer>(`/api/customer/${id}`, {
       params: {
         'token': token
       }

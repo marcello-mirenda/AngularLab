@@ -1,45 +1,45 @@
-import { Component, OnInit } from '@angular/core';
-import { Customer } from '../../models/customer';
-import { ActivatedRoute } from '@angular/router';
-import { CustomerService } from '../../services/customer.service';
-import { AuthenticationService } from '../../services/authentication.service';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Location } from '@angular/common';
-import { DeliveryLocationResult, DialogEditDeliveryLocationService } from '../../services/dialog-edit-delivery-location.service';
-import { DialogOkCancelService } from '../../services/dialog-ok-cancel.service';
-import { InMemoryDataService } from '../../services/in-memory-data.service';
+import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
+
+import { AuthenticationService } from '../../services/authentication.service';
+import { Customer } from '../../models/customer';
+import { CustomerService } from '../../services/customer.service';
+import { DeliveryLocation } from '../../models/delivery-location';
+import { DeliveryLocationResult, DialogEditDeliveryLocationService } from '../../services/dialog-edit-delivery-location.service';
 // tslint:disable-next-line:max-line-length
 import { DIALOG_NAME as DIALOG_NAME_EDIT_DELIVERY_LOCATION } from '../dialog-edit-delivery-location/dialog-edit-delivery-location.component';
+import { DialogOkCancelService } from '../../services/dialog-ok-cancel.service';
 import { DialogResultValue } from '../../models/dialog-result-value.enum';
-import { DeliveryLocation } from '../../models/delivery-location';
-
+import { InMemoryDataService } from '../../services/in-memory-data.service';
+import * as CustomerActions from '../../store/customer-actions';
+import * as fromRoot from '../../store/reducers';
 
 @Component({
   selector: 'app-customer-new',
   templateUrl: './customer-new.component.html',
   styleUrls: ['./customer-new.component.css']
 })
-export class CustomerNewComponent implements OnInit {
+export class CustomerNewComponent implements OnInit, OnDestroy {
 
   private readonly _dialogOkCancelDeliveryLocationSubscription: Subscription;
 
-  customer: Customer = {
-    deliveryLocations: [],
-    firstName: null,
-    id: null,
-    lastName: null
-  };
+  customer: Customer;
   loading = false;
 
   constructor(
     private _location: Location,
-    private _route: ActivatedRoute,
     private _customerService: CustomerService,
     private _autheticationService: AuthenticationService,
     private _dialogOkCancelDeliveryLocationService: DialogOkCancelService<DeliveryLocationResult>,
     private _dialogConfirmDeleteCustomerService: DialogEditDeliveryLocationService,
-    private _InMemoryDataService: InMemoryDataService
+    private _InMemoryDataService: InMemoryDataService,
+    private _store: Store<fromRoot.State>
   ) {
+    _store.dispatch(new CustomerActions.CustomerNew());
+    _store.select(state => state.customers.currentCustomer).subscribe(x => this.customer = x);
+
     this._dialogOkCancelDeliveryLocationSubscription = this._dialogOkCancelDeliveryLocationService.dialogResult$.subscribe(msg => {
       if (msg.name === DIALOG_NAME_EDIT_DELIVERY_LOCATION && msg.result === DialogResultValue.Ok) {
         if (msg.data.operation === 'new') {
@@ -54,6 +54,10 @@ export class CustomerNewComponent implements OnInit {
   }
 
   ngOnInit() {
+  }
+
+  ngOnDestroy() {
+    this._dialogOkCancelDeliveryLocationSubscription.unsubscribe();
   }
 
   onGoBack(): void {
@@ -82,7 +86,7 @@ export class CustomerNewComponent implements OnInit {
     this.loading = true;
     this._customerService.createCustomer(this._autheticationService.getToken(), this.customer)
       .subscribe({
-        next: customer => { },
+        next: customer => this._store.dispatch(new CustomerActions.CustomerCreate(customer)),
         complete: () => {
           this.loading = false;
         },

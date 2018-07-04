@@ -238,7 +238,7 @@ export class InMemoryDataService extends InMemoryDbService {
           if (index > -1) {
             user.customers.splice(index, 1);
           }
-          return me.createOkResponse(info, customerFound);
+          return me.createOkResponse(info, me.createDeepCopy(customerFound));
         } else {
           return me.createNotFoundResponse(info);
         }
